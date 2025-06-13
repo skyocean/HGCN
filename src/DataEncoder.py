@@ -381,6 +381,43 @@ def scale_time_differences(event, sequence, start_time_col, case_index):
     
     return scaled_time_diffs_list
 
+def scale_time_differences_fast(event, start_time_col, case_index):
+    """
+    Faster version: scales time differences using groupby and avoids row-wise filtering.
+    """
+
+    event[start_time_col] = pd.to_datetime(event[start_time_col])
+    
+    # Group events by case
+    grouped = event.sort_values(by=[case_index, start_time_col]).groupby(case_index)
+    
+    # Compute time differences per case and store in flat list and lengths
+    time_diffs_list = []
+    lengths = []
+
+    for _, group in grouped:
+        times = group[start_time_col].values
+        diffs = np.diff(times) / np.timedelta64(1, 's')
+        time_diffs_list.append(diffs)
+        lengths.append(len(diffs))
+
+    # Flatten all diffs
+    all_diffs = np.concatenate(time_diffs_list).reshape(-1, 1)
+
+    # Scale
+    scaler = MinMaxScaler()
+    scaled_all_diffs = scaler.fit_transform(all_diffs).flatten()
+
+    # Split back
+    scaled_time_diffs_list = []
+    index = 0
+    for l in lengths:
+        scaled_time_diffs_list.append(scaled_all_diffs[index:index + l])
+        index += l
+
+    return scaled_time_diffs_list
+
+
 def label_encode_y(y_col):
     # Create a label encoder
     encoder = LabelEncoder()
