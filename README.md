@@ -41,10 +41,11 @@ Jupyter notebooks demonstrating each model type:
   - Embedding: Separates activity/event label as extra NLP-style embedded input
 
 ## Datasets
-- Located in `output/` directory
+- Demonstration Datasets Located in `output/` directory
 - Naming convention:
   - `BPI12*.csv`: Balanced datasets
   - Other filenames: Imbalanced datasets
+- `DataProcessed` include other benchmark datasets.
 
 ## Usage
 1. Encode your event log data using functions from `DataEncoder.py`
